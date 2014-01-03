@@ -1,0 +1,5 @@
+SNES_Keyboard	KEYWORD1
+latchData	KEYWORD2
+storeData	KEYWORD2
+readData	KEYWORD2
+setKeys	KEYWORD2
