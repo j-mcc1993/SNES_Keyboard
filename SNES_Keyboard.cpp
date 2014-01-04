@@ -9,11 +9,10 @@
 #include "SNES_Keyboard.h"
 #include <Arduino.h>
 
-byte count[] = {0,0,0,0,0,0,0,0,0,0,0,0};                          
-char keys[] = "abcdefghijkl";
+byte count[] = {0,0,0,0,0,0,0,0,0,0,0,0}; //Stores 1 or 0 indicating whether a key is pressed                         
+char keys[] = "abcdefghijkl"; //String of keyboard characters to be pressed
 
-int tempbit;
-
+//Default contsructor
 SNES_Keyboard::SNES_Keyboard(void) {
   pulse = 5;
   latch = 7;
@@ -26,6 +25,7 @@ SNES_Keyboard::SNES_Keyboard(void) {
   digitalWrite(pulse, LOW);
 }
 
+//Takes pins as arguments
 SNES_Keyboard::SNES_Keyboard(byte l, byte p, byte d) {
   pulse = p;
   latch = l;
@@ -38,6 +38,7 @@ SNES_Keyboard::SNES_Keyboard(byte l, byte p, byte d) {
   digitalWrite(pulse, LOW);
 }
 
+//Toggle pin
 void SNES_Keyboard::toggle(void) {
   digitalWrite(pulse, HIGH);
   delayMicroseconds(5);
@@ -46,6 +47,7 @@ void SNES_Keyboard::toggle(void) {
   delayMicroseconds(5);
 }
 
+//Tells controller to latch data
 void SNES_Keyboard::latchData(void) {
   digitalWrite(latch, HIGH);
   delayMicroseconds(12);
@@ -54,6 +56,7 @@ void SNES_Keyboard::latchData(void) {
   delayMicroseconds(6);
 }
 
+//Stores data in data_store
 void SNES_Keyboard::storeData(void) {
   data_store = 0;
   for (int i = 0; i < 12; i++) {
@@ -62,6 +65,7 @@ void SNES_Keyboard::storeData(void) {
   }
 }
 
+//Iterates over data_store and presses/releases keys
 void SNES_Keyboard::readData(void) {
   for (int i = 0; i < 12; i++) {
     if (i < 4) {
@@ -80,6 +84,7 @@ void SNES_Keyboard::readData(void) {
   delay(16);
 }
 
+//Change which keys are pressed
 void SNES_Keyboard::setKeys(char new_keys[]) {
   for (int i = 0; i < 12; i++) {
     keys[i] = new_keys[i];
