@@ -68,6 +68,8 @@ void SNES_Keyboard::storeData(void) {
 //Iterates over data_store and presses/releases keys
 void SNES_Keyboard::readData(void) {
   for (int i = 0; i < 12; i++) {
+    //Since the SNES sends out 16 bits of data when reading 
+    //store_data we toggle 4 more times to clear the latched data
     if (i < 4) {
       toggle();
     }
