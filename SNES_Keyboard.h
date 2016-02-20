@@ -10,6 +10,7 @@
 #define SNES_Keyboard_h
 
 #include <Arduino.h>
+#include <Keyboard.h>
 
 class SNES_Keyboard {
 	public:
