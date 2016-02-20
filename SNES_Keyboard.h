@@ -12,6 +12,18 @@
 #include <Arduino.h>
 #include <Keyboard.h>
 
+#define NUM_OF_BUTTONS 12
+
+#define LATCH_PULSE 12
+#define LATCH_DELAY 6
+#define PULSE_DELAY 6
+#define READ_DELAY 16
+#define EXTRA 4
+
+#define PULSE 5
+#define LATCH 7
+#define DATA 9
+
 class SNES_Keyboard {
 	public:
 		SNES_Keyboard(void);
@@ -21,9 +33,9 @@ class SNES_Keyboard {
 		void readData(void);
 		void setKeys(char new_keys[]);
 	private:
-		void toggle(void);
+		void pulseClock(void);
 		int data_store;
-		byte latch, pulse, data, tempbit;
+		byte latch, pulse, data, currentbit, mask;
 };
 
 #endif
