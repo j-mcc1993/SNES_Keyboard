@@ -1,11 +1,15 @@
 /*
-  SNES_Keyboard.h - A library to control a keyboard with a SNES controller.
-
-  *WARNING* This code requires a Leonardo or Micro (NOT DUE!!!)
-  (The Due runs on 3.3v and would likely break if you try to run this code)
-
-  Copyright (c) 2014 James P. McCullough. All rights reserved.
-*/
+ * Filename: SNES_Keyboard.h
+ * Author: James McCullough
+ * Description: This program encapsulates an interface for controlling SNES
+ * 				controllers with arduino.
+ *
+ * !! WARNING !!  This code requires a Leonardo or Micro.  Using a Due may
+ * brick your board due its 3.3v requirement.
+ *
+ * Copyright (c) 2014 James P. McCullough. All rights reserved.
+ */
+ 
 #ifndef SNES_Keyboard_h
 #define SNES_Keyboard_h
 
