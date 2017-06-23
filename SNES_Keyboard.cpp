@@ -3,17 +3,19 @@
  * Author: James McCullough
  * Description: This program encapsulates an interface for controlling SNES
  *    controllers with arduino.
- * !! WARNING !!  This code requires a Leonardo or Micro.  Using a Due may
- * brick your board due its 3.3v requirement.
  *
  * Copyright (c) 2014 James P. McCullough. All rights reserved.
  */
 
 #include "SNES_Keyboard.h"
 
-/* Stores 1 or 0 indicating whether a key is pressed */
-byte isPressed[] = {0,0,0,0,0,0,0,0,0,0,0,0};                          
-char keys[] = "abcdefghijkl"; /* keys to be pressed */
+
+/* Stores true or falseindicating whether a key is pressed */
+boolean isPressed[] = {false, false, false, false, false, false, false, false,
+		       false, false, false, false};
+
+char keys[] = "abcdefghijkl";	/* keys to be pressed */
+
 
 /*
  * SNES_Keyboard::SNES_Keyboard(void);
@@ -22,42 +24,44 @@ char keys[] = "abcdefghijkl"; /* keys to be pressed */
  * SNES controller.  This code sets the default pins and starts the interaction
  * with the keyboard.
  */
-SNES_Keyboard::SNES_Keyboard(void) {
-  pulse = PULSE;
+SNES_Keyboard::SNES_Keyboard() {
+  clck = CLCK;
   latch = LATCH;
   data = DATA;
 
   pinMode(latch, OUTPUT);
-  pinMode(pulse, OUTPUT);
+  pinMode(clck, OUTPUT);
   pinMode(data, INPUT);
 
-  /* set a clean low signal */
+  /* Set latch and clock to known states */
   digitalWrite(latch, LOW); 
-  digitalWrite(pulse, LOW);
+  digitalWrite(clck, HIGH);
 
   Keyboard.begin();
 }
+
 
 /*
  * SNES_Keyboard::SNES_Keyboard(byte l, byte p, byte d);
  *
  * An overloaded constructor to allow users to choose which pins to use.
  */
-SNES_Keyboard::SNES_Keyboard(byte l, byte p, byte d) {
-  pulse = p;
+SNES_Keyboard::SNES_Keyboard(byte l, byte c, byte d) {
   latch = l;
+  clck = c;
   data = d;
 
   pinMode(latch, OUTPUT);
-  pinMode(pulse, OUTPUT);
+  pinMode(clck, OUTPUT);
   pinMode(data, INPUT);
 
-  /* set a clean low signal */
+  /* Set latch and clock to known states */
   digitalWrite(latch, LOW); 
-  digitalWrite(pulse, LOW);
+  digitalWrite(clck, HIGH);
 
   Keyboard.begin();
 }
+
 
 /*
  * void SNES_Keyboard::latchData(void);
@@ -67,12 +71,12 @@ SNES_Keyboard::SNES_Keyboard(byte l, byte p, byte d) {
  *
  * No return value.
  */
-void SNES_Keyboard::latchData(void) {
+void SNES_Keyboard::latchData() {
   digitalWrite(latch, HIGH);
-  delayMicroseconds(LATCH_PULSE);
+  delayMicroseconds(LONG_DELAY);
 
   digitalWrite(latch, LOW);
-  delayMicroseconds(LATCH_DELAY);
+  delayMicroseconds(SHORT_DELAY);
 }
 
 /*
@@ -85,13 +89,14 @@ void SNES_Keyboard::latchData(void) {
  *
  * No return value.
  */
-void SNES_Keyboard::pulseClock(void) {
-  digitalWrite(pulse, HIGH);
-  delayMicroseconds(PULSE_DELAY);
+void SNES_Keyboard::pulseClock() {
+  delayMicroseconds(SHORT_DELAY);
+  digitalWrite(clck, LOW);
     
-  digitalWrite(pulse, LOW);
-  delayMicroseconds(PULSE_DELAY);
+  delayMicroseconds(CLOCK_DELAY);
+  digitalWrite(clck, HIGH);
 }
+
 
 /*
  * void NES_Keyboard::storeData(void);
@@ -101,13 +106,16 @@ void SNES_Keyboard::pulseClock(void) {
  *
  * No return value.
  */
-void SNES_Keyboard::storeData(void) {
-  data_store = 0;
-  for (int i = 0; i < NUM_OF_BUTTONS; i++) {
-    data_store |= (digitalRead(data) << i);
+void SNES_Keyboard::storeData() {
+  state = 0;
+  for (int i = 0; i < NUM_OF_BUTTONS + EXTRA; i++) {  
+    if (digitalRead(data) == LOW) {
+      state |= (MASK << i);
+    }
     pulseClock();
   }
 }
+
 
 /*
  * void SNES_Keyboard::readData(void);
@@ -122,25 +130,24 @@ void SNES_Keyboard::storeData(void) {
  *
  * No return value.
  */
-void SNES_Keyboard::readData(void) {
-  mask = 0x01;
-  for (int i = 0; i < 12; i++) {
-    mask = mask << i;
-    if (i < EXTRA) pulseClock();
+void SNES_Keyboard::readData() {
+  for (int i = 0; i < NUM_OF_BUTTONS; i++) {
+    int currentbit = state & (MASK << i);
 
-    currentbit = data_store & mask;
-
-    if (currentbit == 0 && isPressed[i] == 0) { 
-      isPressed[i] = 1;
+    if (currentbit && !isPressed[i]) { 
+      isPressed[i] = true;
       Keyboard.press(keys[i]);
     }
-    else if (currentbit == 1 && isPressed[i] == 1) {
-      isPressed[i] = 0;
+    else if (!currentbit && isPressed[i]) {
+      isPressed[i] = false;
       Keyboard.release(keys[i]);
     }
   }
+
   delay(READ_DELAY);
 }
+
+
 /*
  * void SNES_Keyboard::setKeys(void);
  *
